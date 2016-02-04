@@ -1,0 +1,89 @@
+1. Give the name of the capitals of all the countries that borders the baltic sea
+
+SELECT capital
+FROM country
+WHERE code in
+	(SELECT DISTINCT country
+	FROM geo_sea
+	WHERE sea = 'Baltic Sea');
+
+
+2. Give the name and area of the worlds northemmost desert
+
+SELECT name
+FROM desert
+WHERE coordinates IS NOT NULL
+ORDER BY (coordinates).latitude DESC
+FETCH FIRST 1 ROWS ONLY;
+
+3. Generate a table of all the mountains ranges that contain at least 3 mountains and the number of countries each range touches
+
+SELECT mountains as mountainRange, count(*) as countriesTouches
+FROM (
+	SELECT DISTINCT mountains, country
+	FROM mountain, geo_mountain
+	WHERE mountain.mountains in (
+		SELECT mountains
+		FROM (
+			SELECT mountains, count(*) as numberOfMountains FROM mountain
+			WHERE mountains IS NOT NULL
+			GROUP BY mountains
+			) as Foo
+		WHERE numberOfMountains >= 3
+		) AND geo_mountain.mountain = mountain.name
+	) as bar
+GROUP BY mountains;
+
+4. Which hemisphere has the largest lake/desert area ratio, the eastern or the western
+
+SELECT *
+FROM
+	(SELECT wLake.lakeA/wDesert.desertA as westRatio
+	FROM
+		(SELECT SUM(area) as lakeA
+		FROM lake
+		WHERE (coordinates).longitude < 0) as wLake
+		,
+		(SELECT SUM(area) as desertA
+		FROM desert
+		WHERE (coordinates).longitude < 0) as wDesert) as western
+	,
+	(SELECT eLake.lakeA/eDesert.desertA as eastRatio
+	FROM
+		(SELECT SUM(area) as lakeA
+		FROM lake
+		WHERE (coordinates).longitude > 0) as eLake
+		,
+		(SELECT SUM(area) as desertA
+		FROM desert
+		WHERE (coordinates).longitude > 0) as eDesert) as eastern
+
+5. Generate the continent names and the number of cities on each continent that are situated no more then 35 degrees from the Equator, for those continents that have an land area above 9000000 sq km
+
+SELECT continent.name as continent, count(*) as cities
+FROM
+	(SELECT country, continent FROM encompasses) as encompasses,
+	(SELECT code FROM country) as country,
+	(SELECT name FROM continent WHERE area > 9000000) as continent,
+	city
+WHERE country.code = encompasses.country AND encompasses.continent = continent.name AND city.country = country.code AND (city.latitude BETWEEN -35 AND 35)
+GROUP BY continent.name
+
+6. List the number of rivers for each European country in decending order
+
+SELECT countryName.name as country, count(*) as rivers
+FROM
+	(SELECT country FROM encompasses WHERE continent = 'Europe') as country,
+	(SELECT DISTINCT river, country FROM geo_river) as river,
+	(SELECT name, code FROM country) as countryName
+WHERE river.country = country.country AND country.country = countryName.code
+GROUP BY countryName.name
+ORDER BY rivers DESC
+
+7. Name of the organizations in Europe containing the word 'Nuclear', with an unknown date of establishment
+
+SELECT name
+FROM
+	(SELECT country FROM encompasses WHERE continent = 'Europe') as country,
+	organization
+WHERE organization.country = country.country AND organization.established IS NULL AND organization.name LIKE '%Nuclear%'

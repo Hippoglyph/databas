@@ -56,7 +56,7 @@ FROM
 		,
 		(SELECT SUM(area) as desertA
 		FROM desert
-		WHERE (coordinates).longitude > 0) as eDesert) as eastern
+		WHERE (coordinates).longitude > 0) as eDesert) as eastern;
 
 5. Generate the continent names and the number of cities on each continent that are situated no more then 35 degrees from the Equator, for those continents that have an land area above 9000000 sq km
 
@@ -67,7 +67,7 @@ FROM
 	(SELECT name FROM continent WHERE area > 9000000) as continent,
 	city
 WHERE country.code = encompasses.country AND encompasses.continent = continent.name AND city.country = country.code AND (city.latitude BETWEEN -35 AND 35)
-GROUP BY continent.name
+GROUP BY continent.name;
 
 6. List the number of rivers for each European country in decending order
 
@@ -78,7 +78,7 @@ FROM
 	(SELECT name, code FROM country) as countryName
 WHERE river.country = country.country AND country.country = countryName.code
 GROUP BY countryName.name
-ORDER BY rivers DESC
+ORDER BY rivers DESC;
 
 7. Name of the organizations in Europe containing the word 'Nuclear', with an unknown date of establishment
 
@@ -86,4 +86,33 @@ SELECT name
 FROM
 	(SELECT country FROM encompasses WHERE continent = 'Europe') as country,
 	organization
-WHERE organization.country = country.country AND organization.established IS NULL AND organization.name LIKE '%Nuclear%'
+WHERE organization.country = country.country AND organization.established IS NULL AND organization.name LIKE '%Nuclear%';
+
+8. Show a list of country name and projected populations in 10, 25,50 and 100 years if current demographic trends continue unabated.
+
+SELECT country.name as country, country.population as year0, 
+ROUND(country.population*POWER((population.population_growth/100) + 1, 10)) as year10, 
+ROUND(country.population*POWER((population.population_growth/100) + 1, 25)) as year25, 
+ROUND(country.population*POWER((population.population_growth/100) + 1, 50)) as year50, 
+ROUND(country.population*POWER((population.population_growth/100) + 1, 100)) as year100
+FROM population, country
+WHERE population.country = country.code;
+
+9. Create a view EightThousanders(name,mountains,height,coordinates) which includes the mountains over or equal to the height of 8000 meters. 
+Query for the countries including EightThousanders. Try to avoid materializing the whole Mountain relation. Verify via EXPLAIN ANALYSE.
+
+CREATE table EightThousanders(
+	name character varying(35) PRIMARY KEY,
+	mountains character varying(35),
+	height numeric,
+	coordinates geocoord CHECK ((coordinates).longitude >= (-180)::numeric AND (coordinates).longitude <= 180::numeric AND (coordinates).latitude >= (-90)::numeric AND (coordinates).latitude <= 90::numeric)
+);
+
+INSERT INTO EightThousanders
+SELECT name, mountains, height, coordinates
+FROM mountain
+WHERE height >= 8000;
+
+SELECT DISTINCT country.name
+FROM country,geo_mountain,EightThousanders
+WHERE country.code = geo_mountain.country AND geo_mountain.mountain = EightThousanders.name;

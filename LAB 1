@@ -101,14 +101,19 @@ WHERE population.country = country.code;
 9. Create a view EightThousanders(name,mountains,height,coordinates) which includes the mountains over or equal to the height of 8000 meters. 
 Query for the countries including EightThousanders. Try to avoid materializing the whole Mountain relation. Verify via EXPLAIN ANALYSE.
 
-CREATE table EightThousanders(
-	name character varying(35) PRIMARY KEY,
-	mountains character varying(35),
-	height numeric,
-	coordinates geocoord CHECK ((coordinates).longitude >= (-180)::numeric AND (coordinates).longitude <= 180::numeric AND (coordinates).latitude >= (-90)::numeric AND (coordinates).latitude <= 90::numeric)
-);
+-- CREATE table EightThousanders(
+-- 	name character varying(35) PRIMARY KEY,
+-- 	mountains character varying(35),
+-- 	height numeric,
+-- 	coordinates geocoord CHECK ((coordinates).longitude >= (-180)::numeric AND (coordinates).longitude <= 180::numeric AND (coordinates).latitude >= (-90)::numeric AND (coordinates).latitude <= 90::numeric)
+-- );
 
-INSERT INTO EightThousanders
+-- INSERT INTO EightThousanders
+-- SELECT name, mountains, height, coordinates
+-- FROM mountain
+-- WHERE height >= 8000;
+
+CREATE VIEW EightThousanders AS
 SELECT name, mountains, height, coordinates
 FROM mountain
 WHERE height >= 8000;
@@ -116,3 +121,27 @@ WHERE height >= 8000;
 SELECT DISTINCT country.name
 FROM country,geo_mountain,EightThousanders
 WHERE country.code = geo_mountain.country AND geo_mountain.mountain = EightThousanders.name;
+
+10. Give names of all the countries (recursively) reachable from Sweden via borders
+
+WITH RECURSIVE temp AS (
+    SELECT DISTINCT 1 AS n,
+                    CASE 
+                    	WHEN country2 = 'S' THEN country1
+                        ELSE country2
+                    END AS country
+    FROM borders 
+    WHERE country1 = 'S' OR country2 = 'S'
+    UNION
+    SELECT DISTINCT t.n + 1 AS n,
+                    CASE 
+                    	WHEN b.country2 = t.country THEN b.country1
+                        ELSE b.country2
+                    END AS country      
+    FROM borders b
+    JOIN temp t
+    ON b.country1 = t.country OR b.country2 = t.country
+    WHERE t.n < 300
+)
+SELECT DISTINCT country
+FROM temp

@@ -124,24 +124,24 @@ WHERE country.code = geo_mountain.country AND geo_mountain.mountain = EightThous
 
 10. Give names of all the countries (recursively) reachable from Sweden via borders
 
-WITH RECURSIVE temp AS (
-    SELECT DISTINCT 1 AS n,
-                    CASE 
-                    	WHEN country2 = 'S' THEN country1
-                        ELSE country2
-                    END AS country
+WITH RECURSIVE temp(visited) AS (
+    SELECT DISTINCT
+        CASE 
+        	WHEN country2 = 'S' THEN country1
+            ELSE country2
+        END AS country
     FROM borders 
     WHERE country1 = 'S' OR country2 = 'S'
     UNION
-    SELECT DISTINCT t.n + 1 AS n,
-                    CASE 
-                    	WHEN b.country2 = t.country THEN b.country1
-                        ELSE b.country2
-                    END AS country      
-    FROM borders b
-    JOIN temp t
-    ON b.country1 = t.country OR b.country2 = t.country
-    WHERE t.n < 300
+    SELECT DISTINCT
+        CASE 
+        	WHEN country2 = visited THEN country1
+            ELSE country2
+        END AS country      
+    FROM borders, temp
+    WHERE (not(visited = country1) AND visited = country2) or (not(visited = country2) AND visited = country1)
 )
-SELECT DISTINCT country
-FROM temp
+SELECT DISTINCT name
+FROM temp, country
+WHERE visited = code
+ORDER BY name;

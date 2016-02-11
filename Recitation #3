@@ -25,8 +25,24 @@ ORDER BY unitSold DESC;
 
 --In SQL give the employees that have used every shipper for the orders they processed." Do this using both double not exists and also using aggregation. Discuss which you think is better and why.
 
-SELECT employeeid
-FROM (SELECT DISTINCT employeeid, shipvia FROM orders) AS orders
-GROUP BY employeeid
-HAVING COUNT(shipvia) = (SELECT COUNT(*) FROM shippers);
+§
 
+
+SELECT DISTINCT employeeid 
+FROM employees
+WHERE NOT EXISTS(
+	SELECT 1
+	FROM
+	(SELECT DISTINCT employeeid
+	FROM 
+		(SELECT DISTINCT employeeid FROM employees) AS allEmp
+		,
+		(SELECT DISTINCT shipperid FROM shippers) AS allShip
+	WHERE NOT EXISTS(
+					SELECT 1
+					FROM orders
+					WHERE orders.employeeid = allEmp.employeeid AND orders.shipvia = allShip.shipperid
+					)
+	) AS Foo
+	WHERE Foo.employeeid = employees.employeeid
+)

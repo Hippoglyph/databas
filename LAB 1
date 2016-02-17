@@ -18,7 +18,7 @@ FETCH FIRST 1 ROWS ONLY;
 
 3. Generate a table of all the mountains ranges that contain at least 3 mountains and the number of countries each range touches
 
-SELECT mountains as mountainRange, count(*) as countriesTouches
+/*SELECT mountains as mountainRange, count(*) as countriesTouches
 FROM (
 	SELECT DISTINCT mountains, country
 	FROM mountain, geo_mountain
@@ -32,7 +32,16 @@ FROM (
 		WHERE numberOfMountains >= 3
 		) AND geo_mountain.mountain = mountain.name
 	) as bar
-GROUP BY mountains;
+GROUP BY mountains;*/
+
+SELECT mountains, COUNT(DISTINCT country) as touches
+FROM(
+	SELECT mountain.mountains as mountains, mountain.name as mountain, geo_mountain.country as country
+	FROM geo_mountain, mountain
+	WHERE geo_mountain.mountain = mountain.name AND mountain.mountains IS NOT NULL
+) as Foo
+GROUP BY mountains
+HAVING COUNT(DISTINCT mountain) >= 3;
 
 4. Which hemisphere has the largest lake/desert area ratio, the eastern or the western
 
@@ -42,21 +51,21 @@ FROM
 	FROM
 		(SELECT SUM(area) as lakeA
 		FROM lake
-		WHERE (coordinates).longitude < 0) as wLake
+		WHERE (coordinates).longitude <= 0) as wLake
 		,
 		(SELECT SUM(area) as desertA
 		FROM desert
-		WHERE (coordinates).longitude < 0) as wDesert) as western
+		WHERE (coordinates).longitude <= 0) as wDesert) as western
 	,
 	(SELECT eLake.lakeA/eDesert.desertA as eastRatio
 	FROM
 		(SELECT SUM(area) as lakeA
 		FROM lake
-		WHERE (coordinates).longitude > 0) as eLake
+		WHERE (coordinates).longitude >= 0) as eLake
 		,
 		(SELECT SUM(area) as desertA
 		FROM desert
-		WHERE (coordinates).longitude > 0) as eDesert) as eastern;
+		WHERE (coordinates).longitude >= 0) as eDesert) as eastern;
 
 5. Generate the continent names and the number of cities on each continent that are situated no more then 35 degrees from the Equator, for those continents that have an land area above 9000000 sq km
 

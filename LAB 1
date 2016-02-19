@@ -127,7 +127,7 @@ SELECT name, mountains, height, coordinates
 FROM mountain
 WHERE height >= 8000;
 
-SELECT DISTINCT country.name
+EXPLAIN ANALYZE SELECT DISTINCT country.name
 FROM country,geo_mountain,EightThousanders
 WHERE country.code = geo_mountain.country AND geo_mountain.mountain = EightThousanders.name;
 

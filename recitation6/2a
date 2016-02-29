@@ -1,0 +1,7 @@
+(:Elements for teams with more than 4 members:)
+
+let $mountains := doc("monsters.xml")/mountains/range/mountain
+let $teams := ($mountains/first,$mountains/winter)
+for $x in $teams
+where count($x/member) > 4
+return $x

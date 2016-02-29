@@ -1,0 +1,5 @@
+(:Names of mountains climbed in the winter:)
+
+for $x in doc("monsters.xml")/mountains/range/mountain
+where exists($x/winter)
+return $x/@name

@@ -1,0 +1,5 @@
+(:Names of mountains at least partially within Nepal:)
+
+for $x in doc("monsters.xml")/mountains/range/mountain
+where $x/country = "Nepal"
+return $x/@name

@@ -1,0 +1,10 @@
+(:Names of all team members, on all expeditions, ordered alphabetically, with no duplicates:)
+
+(:
+count(doc("monsters.xml")/mountains/range/mountain/*/member)
+count(distinct-values (doc("monsters.xml")/mountains/range/mountain/*/member))
+:)
+
+for $x in distinct-values (doc("monsters.xml")/mountains/range/mountain/*/member)
+order by $x
+return $x

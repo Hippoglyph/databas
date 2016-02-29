@@ -1,0 +1,3 @@
+(:Names of mountains in the Himalayan mountain range:)
+
+doc("monsters.xml")/mountains/range[@name="Himalayan"]/mountain/@name

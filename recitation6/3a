@@ -1,0 +1,11 @@
+(: Names and dates of death of those who died on Lhotse:)
+
+declare function local:tableIndexOfMountain($p as xs:string?) as xs:int
+{
+	let $listContent := doc("tragedies.xml")//div[@id = "toc" and @class = "toc"]
+	let $index := $listContent//a[@href=concat("#",$p)]/span[@class="tocnumber"]/text()
+	return $index
+};
+let $index := local:tableIndexOfMountain("Lhotse")
+
+return doc("tragedies.xml")//table[@class ="wikitable sortable"][$index]

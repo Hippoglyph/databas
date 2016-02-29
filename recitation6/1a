@@ -1,0 +1,3 @@
+(:Elements for the over 8300 meter mountains:)
+
+doc("monsters.xml")/mountains/range/mountain[@height>8300]

@@ -1,0 +1,10 @@
+(:Write an XQuery function that gives the names of mountains not yet climbed in winter:)
+
+declare function local:noWinterYet()
+{
+	for $x in doc("monsters.xml")/mountains/range/mountain
+	where not(exists($x/winter))
+	return $x/@name
+};
+
+local:noWinterYet()

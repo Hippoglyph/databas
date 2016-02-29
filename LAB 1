@@ -131,6 +131,10 @@ EXPLAIN ANALYZE SELECT DISTINCT country.name
 FROM country,geo_mountain,EightThousanders
 WHERE country.code = geo_mountain.country AND geo_mountain.mountain = EightThousanders.name;
 
+EXPLAIN ANALYSE SELECT DISTINCT country.name
+FROM country,geo_mountain,mountain
+WHERE country.code = geo_mountain.country AND geo_mountain.mountain = mountain.name AND mountain.height >= 8000;
+
 10. Give names of all the countries (recursively) reachable from Sweden via borders
 
 WITH RECURSIVE temp(visited) AS (

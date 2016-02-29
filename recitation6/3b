@@ -1,0 +1,23 @@
+(:Names of those who died on 'The Killing Mountain':)
+
+declare function local:getMountainName($p as xs:string?) as xs:string
+{
+	let $mountain := doc("monsters.xml")/mountains/range/mountain
+	for $x in $mountain
+	where $x/nickname = $p
+	return data($x/@name)
+};
+
+declare function local:tableIndexOfMountain($p as xs:string?) as xs:int
+{
+	let $listContent := doc("tragedies.xml")//div[@id = "toc" and @class = "toc"]
+	let $index := $listContent//a[@href=concat("#",$p)]/span[@class="tocnumber"]
+	return data($index)
+};
+
+let $name := local:getMountainName("The Killing Mountain")
+let $name := replace($name, " ", "_")
+let $index := local:tableIndexOfMountain($name)
+
+for $row in doc("tragedies.xml")//table[@class ="wikitable sortable"][$index]/tr
+return (concat($row/td[1], " ",  $row/td[2]))

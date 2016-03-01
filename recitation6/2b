@@ -2,4 +2,4 @@
 
 for $x in doc("monsters.xml")/mountains/range/mountain
 order by $x/@height
-return $x/@name
+return data($x/@name)
